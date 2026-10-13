@@ -27,7 +27,7 @@ func (a *App) GetResumePDF() (string, error) {
 	return a.resumeService.GetResumeBase64()
 }
 
-// ParseResume 解析简历为 Markdown
-func (a *App) ParseResume() (string, error) {
-	return a.resumeService.ParseResume(a.ctx)
+// ParseResume 将本地提取的 PDF 文字和扫描页交给当前模型整理为 Markdown。
+func (a *App) ParseResume(text string, images []string, apiKey, baseURL, model string) (string, error) {
+	return a.resumeService.ParseResume(a.ctx, text, images, apiKey, baseURL, model)
 }

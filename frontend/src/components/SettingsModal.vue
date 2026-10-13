@@ -112,6 +112,7 @@
             :resumePath="settingsStore.tempSettings.resumePath"
             :rawContent="settingsStore.resumeRawContent"
             :isParsing="settingsStore.isResumeParsing"
+            :parseError="settingsStore.resumeParseError"
             @update:rawContent="val => settingsStore.resumeRawContent = val"
             @select-resume="settingsStore.selectResume"
             @clear-resume="settingsStore.clearResume"

@@ -72,7 +72,7 @@ func (a *OpenAIAdapter) toOpenAIParts(parts []ContentPart) []openai.ChatCompleti
 		switch part.Type {
 		case ContentText:
 			result = append(result, openai.TextContentPart(part.Text))
-		case ContentImage, ContentPDF:
+		case ContentImage:
 			result = append(result, openai.ImageContentPart(openai.ChatCompletionContentPartImageImageURLParam{
 				URL: part.Base64,
 			}))
@@ -152,12 +152,18 @@ func (a *OpenAIAdapter) parseError(err error) error {
 		Code       string `json:"code"`
 		Message    string `json:"message"`
 		Type       string `json:"type"`
+		Error      struct {
+			Message string `json:"message"`
+		} `json:"error"`
 	}
 
-	if parseErr := json.Unmarshal([]byte(jsonPart), &response); parseErr != nil {
+	if parseErr := json.NewDecoder(strings.NewReader(jsonPart)).Decode(&response); parseErr != nil {
 		return fmt.Errorf("请求失败，请稍后重试")
 	}
 
+	if response.Error.Message != "" {
+		return fmt.Errorf("%s", response.Error.Message)
+	}
 	if response.Message != "" {
 		return fmt.Errorf("%s", response.Message)
 	}

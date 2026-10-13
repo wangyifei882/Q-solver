@@ -5,6 +5,7 @@ import {
   GetDomainCategories,
   GetInitStatus,
   GetModels,
+  GetResumePDF,
   GetScreenshotPreview,
   GetSettings,
   MoveWindow,
@@ -38,6 +39,7 @@ export const api = {
   updateSettings: (json) => UpdateSettings(json),
 
   getModels: (apiKey) => GetModels(apiKey),
+  getResumePDF: () => GetResumePDF(),
   testConnection: (apiKey, model) => TestConnection(apiKey, model),
 
   triggerSolve: () => TriggerSolve(),
@@ -52,7 +54,7 @@ export const api = {
 
   selectResume: () => SelectResume(),
   clearResume: () => ClearResume(),
-  parseResume: () => ParseResume(),
+  parseResume: (text, images, apiKey, baseURL, model) => ParseResume(text, images, apiKey, baseURL, model),
 
   restoreFocus: () => RestoreFocus(),
   removeFocus: () => RemoveFocus(),

@@ -29,10 +29,9 @@ type ContentType string
 const (
 	ContentText  ContentType = "text"
 	ContentImage ContentType = "image"
-	ContentPDF   ContentType = "pdf"
 )
 
-// ContentPart 内容块（支持文本、图片、PDF）
+// ContentPart 内容块（支持文本和图片）
 type ContentPart struct {
 	Type   ContentType `json:"type"`
 	Text   string      `json:"text,omitempty"`
@@ -83,11 +82,6 @@ func TextPart(text string) ContentPart {
 // ImagePart 创建图片内容块
 func ImagePart(base64URL string) ContentPart {
 	return ContentPart{Type: ContentImage, Base64: base64URL}
-}
-
-// PDFPart 创建 PDF 内容块
-func PDFPart(base64Data string) ContentPart {
-	return ContentPart{Type: ContentPDF, Base64: "data:application/pdf;base64," + base64Data}
 }
 
 // ParseBase64DataURL 解析 data:xxx;base64,... 格式

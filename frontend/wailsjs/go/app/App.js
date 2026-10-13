@@ -70,8 +70,8 @@ export function OpenScreenCaptureSettings() {
   return window['go']['app']['App']['OpenScreenCaptureSettings']();
 }
 
-export function ParseResume() {
-  return window['go']['app']['App']['ParseResume']();
+export function ParseResume(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['app']['App']['ParseResume'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function RemoveFocus() {

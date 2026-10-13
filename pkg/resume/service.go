@@ -104,18 +104,13 @@ func (s *Service) GetResumeBase64() (string, error) {
 	return encoded, nil
 }
 
-func (s *Service) ParseResume(ctx context.Context) (string, error) {
-	resumeBase64, err := s.GetResumeBase64()
-	if err != nil {
-		return "", fmt.Errorf("读取简历失败: %v", err)
-	}
-	if resumeBase64 == "" {
-		return "", fmt.Errorf("请先选择简历文件")
-	}
-
+func (s *Service) ParseResume(ctx context.Context, text string, images []string, apiKey, baseURL, model string) (string, error) {
 	s.mu.RLock()
 	cfg := s.config
 	s.mu.RUnlock()
+	cfg.APIKey = apiKey
+	cfg.BaseURL = baseURL
+	cfg.Model = model
 
 	if strings.TrimSpace(cfg.APIKey) == "" {
 		return "", fmt.Errorf("请先配置 API Key")
@@ -123,16 +118,23 @@ func (s *Service) ParseResume(ctx context.Context) (string, error) {
 	if strings.TrimSpace(cfg.Model) == "" {
 		return "", fmt.Errorf("请先选择模型")
 	}
+	if strings.TrimSpace(text) == "" && len(images) == 0 {
+		return "", fmt.Errorf("PDF 中没有可解析的内容")
+	}
 
 	logger.Println("开始通过当前模型解析简历")
 
 	adapter := llm.NewOpenAIAdapter(&cfg)
+	parts := []llm.ContentPart{llm.TextPart("请将这份简历解析并整理为结构清晰的 Markdown。")}
+	if strings.TrimSpace(text) != "" {
+		parts = append(parts, llm.TextPart("从 PDF 提取的文字：\n"+text))
+	}
+	for _, image := range images {
+		parts = append(parts, llm.ImagePart(image))
+	}
 	messages := []llm.Message{
 		llm.NewSystemMessage(prompts.ResumeParsePrompt),
-		llm.NewMultiPartMessage(llm.RoleUser, []llm.ContentPart{
-			llm.TextPart("请将这份简历解析并整理为结构清晰的 Markdown。"),
-			llm.PDFPart(resumeBase64),
-		}),
+		llm.NewMultiPartMessage(llm.RoleUser, parts),
 	}
 
 	result, err := adapter.GenerateContent(ctx, cfg.Model, messages)

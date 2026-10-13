@@ -58,8 +58,8 @@
           <Icon name="alert-triangle" :size="24" class="error-icon" />
         </div>
         <div class="status-text">
-          <span class="status-title">暂未生成解析结果</span>
-          <span class="status-desc">你可以重新解析，也可以直接手动粘贴或编辑 Markdown 内容。</span>
+          <span class="status-title">{{ parseError ? '解析失败' : '暂未生成解析结果' }}</span>
+          <span class="status-desc">{{ parseError || '你可以重新解析，也可以直接手动粘贴或编辑 Markdown 内容。' }}</span>
         </div>
         <button class="retry-btn" @click="$emit('parse-resume')">
           <Icon name="refresh" :size="13" />
@@ -68,6 +68,7 @@
       </div>
 
       <div v-else class="md-panel">
+        <div v-if="parseError" class="parse-error">{{ parseError }}</div>
         <div class="md-toolbar">
           <div class="toolbar-tabs">
             <button class="tab-btn" :class="{ active: !isEditing }" @click="isEditing = false">预览</button>
@@ -104,6 +105,7 @@ const props = defineProps({
   resumePath: { type: String, default: '' },
   rawContent: { type: String, default: '' },
   isParsing: { type: Boolean, default: false },
+  parseError: { type: String, default: '' },
 })
 
 const emit = defineEmits(['select-resume', 'clear-resume', 'parse-resume', 'update:rawContent'])
@@ -419,6 +421,13 @@ function updateContent() {
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
   overflow: hidden;
+}
+
+.parse-error {
+  padding: var(--sp-2) var(--sp-3);
+  color: var(--color-error);
+  background: var(--error-bg);
+  font-size: var(--text-xs);
 }
 
 .md-toolbar {

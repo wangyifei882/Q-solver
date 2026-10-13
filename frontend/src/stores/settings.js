@@ -31,6 +31,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const domainCategories = ref([])
   const resumeRawContent = ref('')
   const isResumeParsing = ref(false)
+  const resumeParseError = ref('')
 
   const isMacOS = ref(
     typeof navigator !== 'undefined' &&
@@ -345,6 +346,7 @@ export const useSettingsStore = defineStore('settings', () => {
     if (path) {
       tempSettings.resumePath = path
       resumeRawContent.value = ''
+      resumeParseError.value = ''
       ui.showToast('已选择文件，正在自动解析...', 'info')
       await parseResume()
     }
@@ -354,19 +356,29 @@ export const useSettingsStore = defineStore('settings', () => {
     await api.clearResume()
     tempSettings.resumePath = ''
     resumeRawContent.value = ''
+    resumeParseError.value = ''
   }
 
   async function parseResume() {
     if (!tempSettings.resumePath) return
+    resumeParseError.value = ''
     isResumeParsing.value = true
     try {
-      const result = await api.parseResume()
+      if (!tempSettings.apiKey) throw new Error('请先在 API 页面填写 API Key')
+      if (!tempSettings.model) throw new Error('请先在模型页面选择模型')
+      const { extractResumeInput } = await import('../utils/pdf-resume')
+      const pdfBase64 = await api.getResumePDF()
+      const { text, images } = await extractResumeInput(pdfBase64)
+      const result = await api.parseResume(
+        text, images, tempSettings.apiKey, tempSettings.baseURL, tempSettings.model
+      )
       resumeRawContent.value = result
       tempSettings.resumeContent = result
       ui.showToast('简历解析成功', 'success')
     } catch (e) {
       console.error(e)
-      ui.showToast(e?.message || '简历解析失败', 'error')
+      resumeParseError.value = e?.message || '简历解析失败'
+      ui.showToast(resumeParseError.value, 'error')
     } finally {
       isResumeParsing.value = false
     }
@@ -384,7 +396,7 @@ export const useSettingsStore = defineStore('settings', () => {
     settings, tempSettings,
     shortcuts, tempShortcuts,
     domainCategories,
-    resumeRawContent, isResumeParsing,
+    resumeRawContent, isResumeParsing, resumeParseError,
     isMacOS,
     recordingAction, recordingText, shortcutActions,
     maskedKey, solveShortcut, sendShortcut, deleteShortcut, toggleShortcut,

@@ -38,7 +38,7 @@ export function OpenMicrophoneSettings():Promise<void>;
 
 export function OpenScreenCaptureSettings():Promise<void>;
 
-export function ParseResume():Promise<string>;
+export function ParseResume(arg1:string,arg2:Array<string>,arg3:string,arg4:string,arg5:string):Promise<string>;
 
 export function RemoveFocus():Promise<void>;
 
